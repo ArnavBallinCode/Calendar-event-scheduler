@@ -21,19 +21,29 @@ export default function ShareEventPage({
   const [loading, setLoading] = useState(true)
   const [copied, setCopied] = useState(false)
   const [eventId, setEventId] = useState<string>("")
+  const [error, setError] = useState<string>("")
 
   useEffect(() => {
     ;(async () => {
-      const { id } = await params
-      setEventId(id)
+      try {
+        const { id } = await params
+        setEventId(id)
 
-      const supabase = createClient()
-      const { data, error } = await supabase.from("events").select("*").eq("id", id).single()
+        const supabase = createClient()
+        const { data, error } = await supabase.from("events").select("*").eq("id", id).single()
 
-      if (!error && data) {
-        setEvent(data)
+        if (error) {
+          console.log("[v0] Error fetching event:", error)
+          setError("Failed to load event")
+        } else if (data) {
+          setEvent(data)
+        }
+      } catch (err) {
+        console.log("[v0] Exception:", err)
+        setError("An error occurred")
+      } finally {
+        setLoading(false)
       }
-      setLoading(false)
     })()
   }, [params])
 
@@ -46,6 +56,7 @@ export default function ShareEventPage({
   }
 
   if (loading) return <div className="text-center py-8">Loading...</div>
+  if (error) return <div className="text-center py-8 text-red-600">{error}</div>
   if (!event) return <div className="text-center py-8">Event not found</div>
 
   return (

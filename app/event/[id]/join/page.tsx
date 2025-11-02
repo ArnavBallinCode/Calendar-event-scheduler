@@ -29,19 +29,33 @@ export default function JoinEventPage({
   const [submitted, setSubmitted] = useState(false)
   const [responseId, setResponseId] = useState<string>("")
   const [eventId, setEventId] = useState<string>("")
+  const [error, setError] = useState<string>("")
 
   useEffect(() => {
     ;(async () => {
-      const { id } = await params
-      setEventId(id)
+      try {
+        const { id } = await params
+        setEventId(id)
 
-      const supabase = createClient()
-      const { data, error } = await supabase.from("events").select("*").eq("id", id).single()
+        const supabase = createClient()
+        const { data, error } = await supabase.from("events").select("*").eq("id", id).single()
 
-      if (!error && data) {
-        setEvent(data)
+        console.log("[v0] Event fetch result:", { data, error })
+
+        if (error) {
+          console.log("[v0] Error fetching event:", error)
+          setError("Failed to load event")
+        } else if (data) {
+          setEvent(data)
+        } else {
+          setError("Event not found")
+        }
+      } catch (err) {
+        console.log("[v0] Exception in useEffect:", err)
+        setError("An error occurred while loading the event")
+      } finally {
+        setLoading(false)
       }
-      setLoading(false)
     })()
   }, [params])
 
@@ -62,10 +76,14 @@ export default function JoinEventPage({
     if (!error && data) {
       setResponseId(data.id)
       setSubmitted(true)
+    } else {
+      console.log("[v0] Error creating response:", error)
+      setError("Failed to submit your name")
     }
   }
 
   if (loading) return <div className="text-center py-8">Loading...</div>
+  if (error) return <div className="text-center py-8 text-red-600">{error}</div>
   if (!event) return <div className="text-center py-8">Event not found</div>
 
   if (!submitted) {
