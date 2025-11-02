@@ -15,9 +15,17 @@ interface Props {
   eventTitle: string
   timezone: string
   durationMinutes: number
+  isCreator?: boolean
 }
 
-export default function AvailabilityCalendar({ eventId, responseId, eventTitle, timezone, durationMinutes }: Props) {
+export default function AvailabilityCalendar({
+  eventId,
+  responseId,
+  eventTitle,
+  timezone,
+  durationMinutes,
+  isCreator,
+}: Props) {
   const [availability, setAvailability] = useState<Record<string, boolean>>({})
   const [loading, setLoading] = useState(false)
   const router = useRouter()
@@ -51,7 +59,11 @@ export default function AvailabilityCalendar({ eventId, responseId, eventTitle, 
     }
 
     setLoading(false)
-    router.push(`/event/${eventId}/results`)
+    if (isCreator) {
+      router.push(`/event/${eventId}/share`)
+    } else {
+      router.push(`/event/${eventId}/results`)
+    }
   }
 
   return (

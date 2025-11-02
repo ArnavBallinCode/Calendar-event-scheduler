@@ -34,7 +34,8 @@ export default function CreateEventPage() {
         throw new Error("Not authenticated")
       }
 
-      const { data, error: dbError } = await supabase
+      // Create event
+      const { data: eventData, error: eventError } = await supabase
         .from("events")
         .insert({
           creator_id: user.id,
@@ -45,9 +46,22 @@ export default function CreateEventPage() {
         .select()
         .single()
 
-      if (dbError) throw dbError
+      if (eventError) throw eventError
 
-      router.push(`/event/${data.id}/share`)
+      const { data: responseData, error: responseError } = await supabase
+        .from("event_responses")
+        .insert({
+          event_id: eventData.id,
+          responder_name: user.user_metadata?.full_name || "Event Creator",
+          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+          is_creator: true,
+        })
+        .select()
+        .single()
+
+      if (responseError) throw responseError
+
+      router.push(`/event/${eventData.id}/add-availability?responseId=${responseData.id}`)
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred")
     } finally {

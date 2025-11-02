@@ -70,9 +70,14 @@ export default function ShareEventPage({
               </div>
             </div>
 
-            <Button onClick={() => (window.location.href = "/dashboard")} className="w-full">
-              Back to Dashboard
-            </Button>
+            <div className="flex gap-4">
+              <Button onClick={() => (window.location.href = `/event/${eventId}/results`)} className="flex-1">
+                View Results
+              </Button>
+              <Button onClick={() => (window.location.href = "/dashboard")} variant="outline" className="flex-1">
+                Back to Dashboard
+              </Button>
+            </div>
           </CardContent>
         </Card>
       </div>
